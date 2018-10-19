@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="hadoop">
+    <CLASSES>
+      <root url="file://E:/hadoop-2.6.0/share/hadoop" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
