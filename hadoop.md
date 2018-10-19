@@ -1,3 +1,5 @@
+Ubuntu12   hadoop2.6.5
+
 #stop-all.sh    start-all.sh      找不到命令刷新配置文件  source /etc/profile
 ----------------------
 vi /etc/apt/sources.list
