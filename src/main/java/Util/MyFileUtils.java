@@ -78,7 +78,6 @@ public class MyFileUtils {
                             in.close();
                             output.close();
                         } catch (IOException e) {
-                            // TODO Auto-generated catch block
                             e.printStackTrace();
                             System.out.print(" download failed.");
                         } finally {
