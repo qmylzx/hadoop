@@ -1,5 +1,3 @@
-Ubuntu12   hadoop2.6.5
-
 #stop-all.sh    start-all.sh      找不到命令刷新配置文件  source /etc/profile
 ----------------------
 vi /etc/apt/sources.list
@@ -94,7 +92,6 @@ export PATH=$JAVA_HOME/bin:$JRE_HOME/bin:$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bi
 
 设置我们安装的jdk
 sudo update-alternatives --install /usr/bin/java java /usr/lib/jdk1.8.0_181/bin/java 300
-
 sudo update-alternatives --config java
 
  
@@ -128,7 +125,8 @@ vim /home/hadoop/hadoop-2.6.5/etc/hadoop/slaves
 </property>
 复制代码
 3, 文件hdfs-site.xml，因为只有2个Slave，所以dfs.replication的值设为2。
-
+	dfs.namenode.replication.min  设为1，则写操作就会成功，最终会保证达到replication数2
+	    这里为异步操作
 复制代码
 <property>
     <name>dfs.namenode.secondary.http-address</name>
@@ -146,6 +144,13 @@ vim /home/hadoop/hadoop-2.6.5/etc/hadoop/slaves
     <name>dfs.replication</name>
     <value>2</value>
 </property>
+<property>
+   <name>dfs.permissions</name>
+   <value>false</value>
+</property>
+
+
+
 复制代码
 4, 文件mapred-site.xml，这个文件不存在，首先需要从模板中复制一份：
 
@@ -155,6 +160,10 @@ cp mapred-site.xml.template mapred-site.xml
 <property>
     <name>mapreduce.framework.name</name>
     <value>yarn</value>
+</property>
+<property>
+      <name>mapreduce.map.memory.mb</name>
+      <value>2048</value>
 </property>
 5, 文件yarn-site.xml：
 
@@ -167,8 +176,18 @@ cp mapred-site.xml.template mapred-site.xml
     <name>yarn.nodemanager.aux-services</name>
     <value>mapreduce_shuffle</value>
 </property>
+<property>
+    <name>yarn.nodemanager.vmem-check-enabled</name>
+    <value>false</value>
+</property>
+
+<property>
+   <name>yarn.nodemanager.vmem-pmem-ratio</name>
+    <value>5</value>
+</property>
+E:\hadoop-2.6.0\bin;E:\hadoop-2.6.0\sbin;
 复制代码
-6,在hadoop-env修改JDK配置环境(前面粗体字有提及)，在hadoop/etc/hadoop/下面，将
+6,在hadoop-env.sh修改JDK配置环境(前面粗体字有提及)，在hadoop/etc/hadoop/下面，将
 
 export JAVA_HOME=${JAVA_HOME}
 改成绝对路径
@@ -222,3 +241,24 @@ hadoop fs -cat /output/2018_10_15_20_39_00/part-r-00000
 #
 #
 ##
+11.配置windows7使用远程连接hadoop集群
+下载windows下hadoop环境
+https://pan.baidu.com/s/1XFWeqdz0vwK27WvN5u9Unw
+解压hadoop到windows7本地，解压winutils-master指定版本覆盖win操作系统下的hadoop的bin目录，然后将hadoop.dll放到C:\Windows\System32目录下重启windows系统
+修改windows环境变量  
+创建HADOOP_HOME   值为  E:\hadoop-2.6.0
+创建HADOOP_USER_NAME   值为root
+在Path后添加E:\hadoop-2.6.0\bin;E:\hadoop-2.6.0\sbin;(win系统下hadoop安装目录)
+修改windows本地的hosts文件  C:\Windows\System32\drivers\etc\hosts如下：
+127.0.0.1 localhost
+192.168.88.2 master
+192.168.88.3 slave1
+192.168.88.4 slave2
+12.配置idea
+File->Project Structure->Artifacts 
+点击+，选择第一个JAR，选择from module...
+生成的项目jar包，上传到集群的时候Configration类要使用，我的路径如下
+config.set("mapreduce.job.jar","C:\\Users\\Alen\\hadoop\\out\\artifacts\\hadoop_jar\\hadoop.jar");
+将hadoop环境jar导入项目
+File>Project Structure>Project Settings>Libraries，点+号然后选择Java，然后选择解压出来的hadoop-2.6.1文件夹下share\hadoop\下的jar包
+将Ubuntu环境下core-site.xml 、hdfs-site.xml、mapred-site.xml、yarn-site.xml拷贝到项目的resource下，同时也拷贝到windows下的hadoop下的/etc/hadoop下。
